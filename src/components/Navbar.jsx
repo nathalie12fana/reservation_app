@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
+import { useAuth } from "@/lib/auth";
 
 import {
   DropdownMenu,
@@ -17,17 +18,11 @@ import {
 
 import { ModeToggle } from "./modeTogle/ModeToggle";
 
-import {
-  SignInButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
-
 export default function Navbar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { user, logout, isAuthenticated, isAdmin } = useAuth();
 
   const navItems = [
     { href: "/", label: "Home" },
@@ -102,24 +97,66 @@ export default function Navbar() {
               </DropdownMenuTrigger>
 
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>Account</DropdownMenuLabel>
+                <DropdownMenuLabel>Menu</DropdownMenuLabel>
                 <DropdownMenuSeparator />
 
-                <SignedOut>
-                  <DropdownMenuItem>
-                    <SignInButton />
-                  </DropdownMenuItem>
-                </SignedOut>
-
-                <SignedIn>
-                  <DropdownMenuItem>Dashboard</DropdownMenuItem>
-                  <DropdownMenuItem>Settings</DropdownMenuItem>
-                </SignedIn>
+                {isAuthenticated ? (
+                  <>
+                    <DropdownMenuItem>
+                      <span className="font-medium">👋 {user?.fullName}</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    {isAdmin && (
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin/dashboard">🎛️ Admin Dashboard</Link>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem asChild>
+                      <Link href="/appartements">🏠 Mes Réservations</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={logout}>
+                      🚪 Déconnexion
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link href="/login">🔑 Connexion</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/register">📝 Inscription</Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
 
             <ModeToggle />
-            <UserButton />
+
+            {/* USER BUTTON - Replaced Clerk UserButton */}
+            {isAuthenticated ? (
+              <div className="flex items-center gap-3">
+                <div className={`flex items-center gap-2 px-3 py-1 rounded-full ${scrolled ? 'bg-gray-100' : 'bg-white/20'}`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${scrolled ? 'bg-blue-600 text-white' : 'bg-white text-blue-600'}`}>
+                    {user?.fullName?.charAt(0) || 'U'}
+                  </div>
+                  <span className={`text-sm font-medium ${scrolled ? 'text-gray-700' : 'text-white'}`}>
+                    {user?.fullName?.split(' ')[0]}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className={`px-4 py-2 rounded-lg font-medium transition ${
+                  scrolled
+                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    : 'bg-white text-blue-600 hover:bg-gray-100'
+                }`}
+              >
+                Connexion
+              </Link>
+            )}
           </div>
 
           {/* MOBILE BUTTON */}
@@ -159,6 +196,52 @@ export default function Navbar() {
                 {label}
               </Link>
             ))}
+
+            {/* Mobile Auth Section */}
+            <div className="pt-4 border-t">
+              {isAuthenticated ? (
+                <>
+                  <div className="px-3 py-2 text-sm font-medium text-gray-700">
+                    👋 {user?.fullName}
+                  </div>
+                  {isAdmin && (
+                    <Link
+                      href="/admin/dashboard"
+                      onClick={() => setIsOpen(false)}
+                      className="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100"
+                    >
+                      🎛️ Admin Dashboard
+                    </Link>
+                  )}
+                  <button
+                    onClick={() => {
+                      logout();
+                      setIsOpen(false);
+                    }}
+                    className="w-full text-left px-3 py-2 rounded-md text-red-600 hover:bg-red-50"
+                  >
+                    🚪 Déconnexion
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    onClick={() => setIsOpen(false)}
+                    className="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100"
+                  >
+                    🔑 Connexion
+                  </Link>
+                  <Link
+                    href="/register"
+                    onClick={() => setIsOpen(false)}
+                    className="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100"
+                  >
+                    📝 Inscription
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}

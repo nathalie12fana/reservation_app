@@ -9,7 +9,7 @@ export async function GET(request, { params }) {
   try {
     await connectDB();
 
-    const { id } = await params;
+    const { id } = params;
 
     const appartement = await Appartement.findById(id).populate(
       "proprietaire",
@@ -40,7 +40,7 @@ export async function PUT(request, { params }) {
   try {
     await connectDB();
 
-    const { id } = await params;
+    const { id } = params;
     const data = await request.json();
 
     const appartement = await Appartement.findByIdAndUpdate(id, data, {
@@ -75,7 +75,7 @@ export async function DELETE(request, { params }) {
   try {
     await connectDB();
 
-    const { id } = await params;
+    const { id } = params;
 
     const appartement = await Appartement.findByIdAndDelete(id);
 
