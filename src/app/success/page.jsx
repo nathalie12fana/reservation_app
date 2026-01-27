@@ -1,34 +1,148 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 
 export default function SuccessPage() {
-  const router = useRouter()
+  const searchParams = useSearchParams()
+  const reservationId = searchParams.get('reservationId')
+  const mode = searchParams.get('mode')
+
+  const getModePaiementLabel = (mode) => {
+    const labels = {
+      'orange_money': '🟠 Orange Money',
+      'mobile_money': '📱 Mobile Money',
+      'cash': '💵 Espèces'
+    }
+    return labels[mode] || 'Paiement'
+  }
 
   return (
-    <section className="flex items-center justify-center min-h-screen bg-gray-100 px-4">
-      <div className="bg-white shadow-lg rounded-xl p-8 max-w-md w-full text-center">
-        <h2 className="text-2xl font-bold text-green-600 mb-4">
-          Paiement enregistré avec succès !
-        </h2>
-        <p className="text-gray-700 mb-6">
-          Merci pour votre réservation. Votre paiement a bien été pris en compte.
-        </p>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center px-4 py-12">
+      <div className="max-w-2xl w-full">
+        {/* Carte de succès */}
+        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+          {/* En-tête vert avec icône de succès */}
+          <div className="bg-gradient-to-r from-green-500 to-green-600 p-8 text-center">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full mb-4 animate-bounce">
+              <span className="text-5xl">✓</span>
+            </div>
+            <h1 className="text-3xl font-bold text-white mb-2">
+              Paiement confirmé !
+            </h1>
+            <p className="text-green-100 text-lg">
+              Votre réservation a été enregistrée avec succès
+            </p>
+          </div>
 
-        <div className="bg-gray-50 rounded-lg p-4 mb-6 shadow-inner">
-          <p className="mb-2"><strong>Nom :</strong> Appartement Réservé</p>
-          <p className="mb-2"><strong>Date :</strong> 12/12/2025</p>
-          <p className="mb-2"><strong>Heure :</strong> 14:00</p>
-          <p className="mb-0 font-semibold"><strong>Montant :</strong> 500 000 FCFA</p>
+          {/* Contenu */}
+          <div className="p-8">
+            {/* Informations */}
+            <div className="space-y-4 mb-8">
+              <div className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg">
+                <span className="text-2xl">📧</span>
+                <div>
+                  <p className="font-semibold text-gray-800">Email de confirmation</p>
+                  <p className="text-sm text-gray-600">
+                    Un email de confirmation vous sera envoyé sous peu avec tous les détails de votre réservation.
+                  </p>
+                </div>
+              </div>
+
+              {mode && (
+                <div className="flex items-start gap-3 p-4 bg-yellow-50 rounded-lg">
+                  <span className="text-2xl">💳</span>
+                  <div>
+                    <p className="font-semibold text-gray-800">Mode de paiement</p>
+                    <p className="text-sm text-gray-600">
+                      {getModePaiementLabel(mode)}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {reservationId && (
+                <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
+                  <span className="text-2xl">🔢</span>
+                  <div>
+                    <p className="font-semibold text-gray-800">Numéro de réservation</p>
+                    <p className="text-sm text-gray-600 font-mono">
+                      #{reservationId}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Conservez ce numéro pour toute correspondance
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {mode === 'cash' && (
+                <div className="flex items-start gap-3 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                  <span className="text-2xl">⚠️</span>
+                  <div>
+                    <p className="font-semibold text-orange-800">Rappel - Paiement en espèces</p>
+                    <p className="text-sm text-orange-700">
+                      N'oubliez pas d'apporter le montant en espèces lors de la remise des clés.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Prochaines étapes */}
+            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-6 mb-8">
+              <h2 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <span>📋</span>
+                Et maintenant ?
+              </h2>
+              <ul className="space-y-3 text-sm text-gray-700">
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold">1.</span>
+                  <span>Vous recevrez un email de confirmation avec tous les détails</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold">2.</span>
+                  <span>Le propriétaire vous contactera dans les 24 heures</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-600 font-bold">3.</span>
+                  <span>Préparez vos documents d'identité pour la signature du contrat</span>
+                </li>
+                {mode === 'cash' && (
+                  <li className="flex items-start gap-2">
+                    <span className="text-orange-600 font-bold">4.</span>
+                    <span>Préparez le montant en espèces pour le jour de la remise des clés</span>
+                  </li>
+                )}
+              </ul>
+            </div>
+
+            {/* Boutons d'action */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Link
+                href="/"
+                className="flex-1 text-center bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition transform hover:scale-105"
+              >
+                🏠 Retour à l'accueil
+              </Link>
+              
+              <Link
+                href="/appartements"
+                className="flex-1 text-center border-2 border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold py-3 px-6 rounded-lg transition"
+              >
+                Voir d'autres appartements
+              </Link>
+            </div>
+          </div>
         </div>
 
-        <button
-          onClick={() => router.push('/')}
-          className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded"
-        >
-          Retour à l'accueil
-        </button>
+        {/* Message d'encouragement */}
+        <div className="text-center mt-8">
+          <p className="text-gray-600 text-sm">
+            🎉 Merci d'avoir choisi notre plateforme !
+          </p>
+        </div>
       </div>
-    </section>
+    </div>
   )
 }

@@ -29,8 +29,8 @@ export default function Navbar() {
     { href: "/appartements", label: "Appartements" },
     { href: "/about", label: "About" },
     { href: "/contact", label: "Contact" },
+    {href: "mes-appartements", label:"Mes Appartements"},
   ];
-
   // Detect scroll
   useEffect(() => {
     const handleScroll = () => {

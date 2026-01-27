@@ -67,9 +67,9 @@ export default function PaiementPage({ params }) {
         throw new Error(result.message || 'Erreur de paiement')
       }
 
-      console.log('✅ Paiement réussi, redirection vers confirmation')
-      // Redirection confirmation
-      router.push(`/confirmation/${id}`)
+      console.log('✅ Paiement réussi, redirection vers la page de succès')
+      // Redirection vers la page de succès avec les infos
+      router.push(`/success?reservationId=${id}&mode=${modePaiement}`)
     } catch (err) {
       console.error('💥 Erreur paiement complète:', err)
       setError(err.message)
