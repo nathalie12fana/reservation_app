@@ -130,8 +130,8 @@ export default function ReservationPage({ params }) {
         throw new Error(result.message || 'Erreur lors de la réservation')
       }
 
-      // Redirect to confirmation page
-      router.push(`/confirmation/${result.reservation._id}`)
+      // Redirect to payment page instead of confirmation
+      router.push(`/paiement/${result.reservation._id}`)
       
     } catch (err) {
       console.error('Erreur:', err)

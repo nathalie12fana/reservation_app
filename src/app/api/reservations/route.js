@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import Reservation from "@/models/Reservation";
 import Appartement from "@/models/Appartement";
+import User from "@/models/User";  // ← AJOUTE CETTE LIGNE
 
 /* ======================
    GET : Get all reservations with filters
