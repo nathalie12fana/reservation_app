@@ -12,10 +12,30 @@ export default function ConfirmationPage({ params }) {
   const [paiement, setPaiement] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [redirectCountdown, setRedirectCountdown] = useState(3)
 
   useEffect(() => {
     fetchData()
   }, [id])
+
+  // Rediriger vers le reçu si la réservation est payée ou confirmée
+  useEffect(() => {
+    if (reservation && (reservation.statut === 'payé' || reservation.statut === 'confirmée')) {
+      // Démarrer le compte à rebours
+      const countdownInterval = setInterval(() => {
+        setRedirectCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(countdownInterval)
+            router.push(`/recu/${id}`)
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+      
+      return () => clearInterval(countdownInterval)
+    }
+  }, [reservation, id, router])
 
   async function fetchData() {
     try {
@@ -112,6 +132,9 @@ export default function ConfirmationPage({ params }) {
     return labels[mode] || mode
   }
 
+  // Afficher le message de redirection si le statut est payé ou confirmé
+  const shouldRedirect = reservation && (reservation.statut === 'payé' || reservation.statut === 'confirmée')
+
   return (
     <section className="max-w-3xl mx-auto px-4 py-12">
       {/* En-tête de succès */}
@@ -126,6 +149,25 @@ export default function ConfirmationPage({ params }) {
           Merci pour votre réservation. Vous recevrez un email de confirmation.
         </p>
       </div>
+
+      {/* Message de redirection */}
+      {shouldRedirect && (
+        <div className="bg-blue-50 border-2 border-blue-300 rounded-xl p-6 mb-6 text-center animate-pulse">
+          <div className="text-4xl mb-3">🎉</div>
+          <h3 className="text-xl font-bold text-blue-800 mb-2">
+            Paiement confirmé !
+          </h3>
+          <p className="text-blue-700 mb-4">
+            Redirection vers votre reçu dans <span className="text-2xl font-bold">{redirectCountdown}</span> seconde{redirectCountdown > 1 ? 's' : ''}...
+          </p>
+          <Link
+            href={`/recu/${id}`}
+            className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition"
+          >
+            Voir le reçu maintenant
+          </Link>
+        </div>
+      )}
 
       {/* Informations de la réservation */}
       {reservation && (
@@ -221,7 +263,7 @@ export default function ConfirmationPage({ params }) {
             {paiement.modePaiement === 'cash' && paiement.statut === 'en_attente' && (
               <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
                 <p className="text-sm text-blue-800">
-                  ℹ️ N'oubliez pas d'effectuer le paiement en espèces lors de la remise des clés.
+                  ℹ️ N oubliez pas d effectuer le paiement en espèces lors de la remise des clés.
                 </p>
               </div>
             )}
@@ -239,21 +281,23 @@ export default function ConfirmationPage({ params }) {
       </div>
 
       {/* Actions */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <Link
-          href="/appartements"
-          className="flex-1 text-center border-2 border-gray-300 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-50 transition"
-        >
-          Retour aux appartements
-        </Link>
+      {!shouldRedirect && (
+        <div className="flex flex-col sm:flex-row gap-4">
+          <Link
+            href="/appartements"
+            className="flex-1 text-center border-2 border-gray-300 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-50 transition"
+          >
+            Retour aux appartements
+          </Link>
 
-        <Link
-          href="/mes-reservations"
-          className="flex-1 text-center bg-yellow-600 hover:bg-yellow-700 text-white py-3 rounded-lg font-semibold transition"
-        >
-          Voir mes réservations
-        </Link>
-      </div>
+          <Link
+            href="/mes-reservations"
+            className="flex-1 text-center bg-yellow-600 hover:bg-yellow-700 text-white py-3 rounded-lg font-semibold transition"
+          >
+            Voir mes réservations
+          </Link>
+        </div>
+      )}
 
       {/* Informations supplémentaires */}
       <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
@@ -261,9 +305,9 @@ export default function ConfirmationPage({ params }) {
         <ul className="space-y-2 text-sm text-blue-800">
           <li>✓ Vous allez recevoir un email de confirmation</li>
           <li>✓ Le propriétaire vous contactera sous 24h</li>
-          <li>✓ Vous pourrez suivre votre réservation dans "Mes réservations"</li>
+          <li>✓ Vous pourrez suivre votre réservation dans Mes réservations</li>
           {paiement?.modePaiement === 'cash' && (
-            <li>✓ N'oubliez pas d'apporter le montant en espèces</li>
+            <li>✓ N oubliez pas d apporter le montant en espèces</li>
           )}
         </ul>
       </div>

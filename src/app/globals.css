@@ -119,4 +119,142 @@
   body {
     @apply bg-background text-foreground;
   }
+  @media print {
+  /* Masquer les éléments non nécessaires à l'impression */
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Optimiser la page pour l'impression */
+  @page {
+    size: A4;
+    margin: 1cm;
+  }
+
+  /* Éviter les sauts de page à l'intérieur des sections */
+  .print\:avoid-break {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Forcer un saut de page avant un élément */
+  .print\:page-break-before {
+    page-break-before: always;
+    break-before: always;
+  }
+
+  /* Forcer un saut de page après un élément */
+  .print\:page-break-after {
+    page-break-after: always;
+    break-after: always;
+  }
+
+  /* Optimiser les couleurs pour l'impression */
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Rendre les liens en noir */
+  a {
+    text-decoration: none;
+    color: black !important;
+  }
+
+  /* Optimiser les bordures */
+  .border,
+  .border-2 {
+    border-color: #000 !important;
+  }
+
+  /* Optimiser les couleurs de fond pour l'impression */
+  .bg-yellow-50,
+  .bg-green-50,
+  .bg-blue-50,
+  .bg-gray-50 {
+    background-color: #f5f5f5 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Assurer que les couleurs importantes s'impriment */
+  .bg-yellow-600,
+  .text-yellow-600 {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Optimiser les marges */
+  .max-w-4xl {
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Assurer que les tableaux et grids s'impriment correctement */
+  .grid {
+    display: block !important;
+  }
+
+  .grid > * {
+    display: block !important;
+    width: 100% !important;
+    margin-bottom: 1rem !important;
+  }
+
+  /* Optimiser la taille des polices */
+  h1 {
+    font-size: 24pt !important;
+  }
+
+  h2 {
+    font-size: 20pt !important;
+  }
+
+  h3 {
+    font-size: 16pt !important;
+  }
+
+  p,
+  span,
+  div {
+    font-size: 11pt !important;
+  }
+
+  /* Éviter que les images soient coupées */
+  img {
+    max-width: 100% !important;
+    page-break-inside: avoid;
+  }
+
+  /* Style spécifique pour le reçu */
+  .recu-container {
+    width: 100%;
+    max-width: 21cm; /* Largeur A4 */
+    margin: 0 auto;
+    background: white;
+  }
+
+  /* Optimiser les badges de statut */
+  .badge {
+    border: 1px solid #000;
+    padding: 2px 8px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Assurer que les sections importantes ne sont pas coupées */
+  .section-importante {
+    page-break-inside: avoid;
+    margin-bottom: 1cm;
+  }
+}
+
+/* Styles pour l'écran (prévisualisation) */
+@media screen {
+  .recu-container {
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  }
+}
+
 }

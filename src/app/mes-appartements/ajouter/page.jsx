@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/auth'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
+
 export default function AjouterAppartementPage() {
   const { user, loading: authLoading } = useAuth()
   const router = useRouter()
@@ -139,7 +140,7 @@ export default function AjouterAppartementPage() {
           {/* Titre */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Titre de l'annonce *
+              Titre de l annonce *
             </label>
             <input
               type="text"
@@ -331,7 +332,7 @@ export default function AjouterAppartementPage() {
               placeholder="/images/appt1.jpg, /images/appt2.jpg"
             />
             <p className="text-sm text-gray-500 mt-1">
-              Séparez les URLs par des virgules, ou laissez vide pour utiliser l'icône par défaut
+              Séparez les URLs par des virgules, ou laissez vide pour utiliser licône par défaut
             </p>
           </div>
 

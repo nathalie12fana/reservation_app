@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import Appartement from "@/models/Appartement";
+import User from "@/models/User";
 
 /* ======================
    GET : Get all appartements with optional filters
