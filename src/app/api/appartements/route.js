@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import Appartement from "@/models/Appartement";
-import User from "@/models/User";
 
 /* ======================
    GET : Get all appartements with optional filters
@@ -11,6 +10,7 @@ export async function GET(request) {
     await connectDB();
 
     const { searchParams } = new URL(request.url);
+
     const type = searchParams.get("type");
     const ville = searchParams.get("ville");
     const localisation = searchParams.get("localisation");
@@ -18,15 +18,14 @@ export async function GET(request) {
     const minPrix = searchParams.get("minPrix");
     const maxPrix = searchParams.get("maxPrix");
 
-    // Build filter object
     const filter = {};
 
     if (type) filter.type = type;
     if (ville) filter.ville = ville;
     if (localisation) filter.localisation = localisation;
-    if (disponible !== null) filter.disponible = disponible === "true";
-    
-    // Price range filter
+    if (disponible !== null)
+      filter.disponible = disponible === "true";
+
     if (minPrix || maxPrix) {
       filter.prix = {};
       if (minPrix) filter.prix.$gte = Number(minPrix);
@@ -55,7 +54,6 @@ export async function POST(request) {
     await connectDB();
     const data = await request.json();
 
-    // Validate required fields
     if (!data.titre || !data.prix || !data.ville) {
       return NextResponse.json(
         { message: "Les champs titre, prix et ville sont requis" },
@@ -85,6 +83,7 @@ export async function PUT(request) {
   try {
     await connectDB();
     const data = await request.json();
+
     const { _id, ...updateData } = data;
 
     if (!_id) {
@@ -94,10 +93,11 @@ export async function PUT(request) {
       );
     }
 
-    const appartement = await Appartement.findByIdAndUpdate(_id, updateData, {
-      new: true,
-      runValidators: true,
-    });
+    const appartement = await Appartement.findByIdAndUpdate(
+      _id,
+      updateData,
+      { new: true, runValidators: true }
+    );
 
     if (!appartement) {
       return NextResponse.json(
@@ -125,6 +125,7 @@ export async function PUT(request) {
 export async function DELETE(request) {
   try {
     await connectDB();
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 

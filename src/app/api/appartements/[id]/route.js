@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/mongodb";
+import { connectDB } from "@/lib/mongodb"; // ✅ named import
 import Appartement from "@/models/Appartement";
+import User from "@/models/User";
 
 /* ======================
    GET : Get single appartement by ID
@@ -9,7 +10,10 @@ export async function GET(request, { params }) {
   try {
     await connectDB();
 
-    const { id } = await params;
+    // ❌ Remove await
+    // const { id } = await params;
+    // ✅ Correct:
+    const { id } = params;
 
     const appartement = await Appartement.findById(id).populate(
       "proprietaire",
@@ -40,7 +44,11 @@ export async function PUT(request, { params }) {
   try {
     await connectDB();
 
-    const { id } = await params;
+    // ❌ Remove await
+    // const { id } = await params;
+    // ✅ Correct:
+    const { id } = params;
+
     const data = await request.json();
 
     const appartement = await Appartement.findByIdAndUpdate(id, data, {
@@ -75,7 +83,10 @@ export async function DELETE(request, { params }) {
   try {
     await connectDB();
 
-    const { id } = await params;
+    // ❌ Remove await
+    // const { id } = await params;
+    // ✅ Correct:
+    const { id } = params;
 
     const appartement = await Appartement.findByIdAndDelete(id);
 
