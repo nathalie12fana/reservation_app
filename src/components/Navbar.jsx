@@ -29,8 +29,9 @@ export default function Navbar() {
     { href: "/appartements", label: "Appartements" },
     { href: "/about", label: "About" },
     { href: "/contact", label: "Contact" },
-    {href: "mes-appartements", label:"Mes Appartements"},
+    {href: "/mes-appartements", label:"Mes Appartements"},
   ];
+  
   // Detect scroll
   useEffect(() => {
     const handleScroll = () => {
@@ -103,7 +104,7 @@ export default function Navbar() {
                 {isAuthenticated ? (
                   <>
                     <DropdownMenuItem>
-                      <span className="font-medium">👋 {user?.fullName}</span>
+                      <span className="font-medium">👋 {user?.nom}</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     {isAdmin && (
@@ -112,7 +113,7 @@ export default function Navbar() {
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem asChild>
-                      <Link href="/appartements">🏠 Mes Réservations</Link>
+                      <Link href="/mes-reservations">🏠 Mes Réservations</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={logout}>
                       🚪 Déconnexion
@@ -133,15 +134,15 @@ export default function Navbar() {
 
             <ModeToggle />
 
-            {/* USER BUTTON - Replaced Clerk UserButton */}
+            {/* USER BUTTON */}
             {isAuthenticated ? (
               <div className="flex items-center gap-3">
                 <div className={`flex items-center gap-2 px-3 py-1 rounded-full ${scrolled ? 'bg-gray-100' : 'bg-white/20'}`}>
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${scrolled ? 'bg-blue-600 text-white' : 'bg-white text-blue-600'}`}>
-                    {user?.fullName?.charAt(0) || 'U'}
+                    {user?.nom?.charAt(0)?.toUpperCase() || 'U'}
                   </div>
                   <span className={`text-sm font-medium ${scrolled ? 'text-gray-700' : 'text-white'}`}>
-                    {user?.fullName?.split(' ')[0]}
+                    {user?.nom?.split(' ')[0]}
                   </span>
                 </div>
               </div>
@@ -202,7 +203,7 @@ export default function Navbar() {
               {isAuthenticated ? (
                 <>
                   <div className="px-3 py-2 text-sm font-medium text-gray-700">
-                    👋 {user?.fullName}
+                    👋 {user?.nom}
                   </div>
                   {isAdmin && (
                     <Link
@@ -213,6 +214,13 @@ export default function Navbar() {
                       🎛️ Admin Dashboard
                     </Link>
                   )}
+                  <Link
+                    href="/mes-reservations"
+                    onClick={() => setIsOpen(false)}
+                    className="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100"
+                  >
+                    🏠 Mes Réservations
+                  </Link>
                   <button
                     onClick={() => {
                       logout();

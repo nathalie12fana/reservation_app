@@ -2,12 +2,14 @@
 
 import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
+import { useAuth } from '@/lib/auth'
 import Link from 'next/link'
 import Image from 'next/image'
 
 export default function ReservationPage({ params }) {
   const router = useRouter()
   const { id } = use(params)
+  const { user, isAuthenticated, loading: authLoading } = useAuth()
   
   const [apt, setApt] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -16,8 +18,6 @@ export default function ReservationPage({ params }) {
   // Form state
   const [dateDebut, setDateDebut] = useState('')
   const [dateFin, setDateFin] = useState('')
-  const [utilisateurEmail, setUtilisateurEmail] = useState('')
-  const [utilisateurNom, setUtilisateurNom] = useState('')
   const [error, setError] = useState('')
   const [dateError, setDateError] = useState('')
 
@@ -28,6 +28,13 @@ export default function ReservationPage({ params }) {
   useEffect(() => {
     validateDates()
   }, [dateDebut, dateFin])
+
+  // Rediriger vers login si non authentifié
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.push(`/login?redirect=/reservation/${id}`)
+    }
+  }, [authLoading, isAuthenticated, id, router])
 
   async function fetchAppartement() {
     try {
@@ -94,8 +101,10 @@ export default function ReservationPage({ params }) {
     e.preventDefault()
     
     if (dateError) return
-    if (!utilisateurEmail || !utilisateurNom) {
-      setError('Veuillez remplir tous les champs')
+    
+    if (!isAuthenticated || !user) {
+      setError('Vous devez être connecté pour réserver')
+      router.push(`/login?redirect=/reservation/${id}`)
       return
     }
 
@@ -103,18 +112,19 @@ export default function ReservationPage({ params }) {
       setSubmitting(true)
       setError('')
 
-      // For now, we'll use a mock user ID
-      // In production, you'd get this from auth (Clerk)
-      const mockUserId = '507f1f77bcf86cd799439011' // Replace with real user ID from auth
+      console.log('🔵 Création de la réservation...')
+      console.log('👤 Utilisateur:', user)
 
       const reservationData = {
         appartement: id,
-        utilisateur: mockUserId,
+        utilisateur: user._id,
         dateDebut: new Date(dateDebut).toISOString(),
         dateFin: new Date(dateFin).toISOString(),
         prixTotal: calculatePrixTotal(),
         statut: 'en_attente'
       }
+
+      console.log('📦 Données de réservation:', reservationData)
 
       const response = await fetch('/api/reservations', {
         method: 'POST',
@@ -125,27 +135,51 @@ export default function ReservationPage({ params }) {
       })
 
       const result = await response.json()
+      console.log('📡 Réponse API:', result)
 
       if (!response.ok) {
         throw new Error(result.message || 'Erreur lors de la réservation')
       }
 
-      // Redirect to payment page instead of confirmation
-      router.push(`/paiement/${result.reservation._id}`)
+      // L'API retourne directement l'objet de réservation, pas { reservation: {...} }
+      const reservationId = result._id
+
+      if (!reservationId) {
+        console.error("❌ Structure de réponse inattendue:", result)
+        throw new Error("ID de réservation manquant dans la réponse du serveur")
+      }
+
+      console.log('✅ Réservation créée avec succès, ID:', reservationId)
+      console.log('🔄 Redirection vers la page de paiement...')
+      
+      // Redirection vers la page de paiement
+      router.push(`/paiement/${reservationId}`)
       
     } catch (err) {
-      console.error('Erreur:', err)
+      console.error('💥 Erreur complète:', err)
       setError(err.message)
     } finally {
       setSubmitting(false)
     }
   }
 
-  if (loading) {
+  // Afficher le chargement pendant l'authentification
+  if (authLoading || loading) {
     return (
       <section className="max-w-2xl mx-auto px-4 py-12 min-h-screen">
         <div className="flex justify-center items-center py-20">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600"></div>
+        </div>
+      </section>
+    )
+  }
+
+  // Redirection en cours
+  if (!isAuthenticated) {
+    return (
+      <section className="max-w-2xl mx-auto px-4 py-12 min-h-screen">
+        <div className="flex justify-center items-center py-20">
+          <p className="text-gray-600">Redirection vers la page de connexion...</p>
         </div>
       </section>
     )
@@ -167,9 +201,7 @@ export default function ReservationPage({ params }) {
     )
   }
 
-  if (!apt) {
-    return null
-  }
+  if (!apt) return null
 
   const dureeJours = calculateDuree()
   const prixTotal = calculatePrixTotal()
@@ -179,7 +211,7 @@ export default function ReservationPage({ params }) {
       <h1 className="text-3xl font-bold text-yellow-600 mb-8">Réserver votre appartement</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Colonne gauche - Infos appartement */}
+        {/* Détails de l'appartement */}
         <div>
           <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
             {apt.images && apt.images.length > 0 ? (
@@ -213,87 +245,52 @@ export default function ReservationPage({ params }) {
               </div>
             </div>
           </div>
+
+          {/* Info utilisateur connecté */}
+          {user && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-sm text-blue-800">
+                ℹ️ Connecté en tant que: <strong>{user.nom}</strong> ({user.email})
+              </p>
+            </div>
+          )}
         </div>
 
-        {/* Colonne droite - Formulaire */}
+        {/* Formulaire de réservation */}
         <div>
           <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg p-6">
             <h3 className="text-xl font-semibold mb-6">Informations de réservation</h3>
 
-            {/* Nom */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nom complet *
-              </label>
-              <input
-                type="text"
-                value={utilisateurNom}
-                onChange={(e) => setUtilisateurNom(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                placeholder="Jean Dupont"
-                required
-              />
-            </div>
-
-            {/* Email */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email *
-              </label>
-              <input
-                type="email"
-                value={utilisateurEmail}
-                onChange={(e) => setUtilisateurEmail(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                placeholder="jean@example.com"
-                required
-              />
-            </div>
-
-            {/* Date début */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Date de début *
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Date de début *</label>
               <input
                 type="date"
                 value={dateDebut}
                 onChange={(e) => setDateDebut(e.target.value)}
                 min={new Date().toISOString().split('T')[0]}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500"
                 required
               />
             </div>
 
-            {/* Date fin */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Date de fin *
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Date de fin *</label>
               <input
                 type="date"
                 value={dateFin}
                 onChange={(e) => setDateFin(e.target.value)}
                 min={dateDebut || new Date().toISOString().split('T')[0]}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-yellow-500"
                 required
               />
             </div>
 
-            {/* Erreurs */}
-            {dateError && (
+            {(dateError || error) && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-red-600 text-sm">{dateError}</p>
+                <p className="text-red-600 text-sm">{dateError || error}</p>
               </div>
             )}
 
-            {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-red-600 text-sm">{error}</p>
-              </div>
-            )}
-
-            {/* Résumé */}
             {dateDebut && dateFin && !dateError && (
               <div className="mb-6 p-4 bg-gray-50 rounded-lg">
                 <h4 className="font-semibold mb-3">Résumé</h4>
@@ -303,11 +300,11 @@ export default function ReservationPage({ params }) {
                     <span className="font-medium">{dureeJours} jours</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Prix par mois:</span>
-                    <span className="font-medium">{apt.prix?.toLocaleString()} FCFA</span>
+                    <span className="text-gray-600">Prix/mois:</span>
+                    <span className="font-medium">{apt.prix.toLocaleString()} FCFA</span>
                   </div>
                   <div className="flex justify-between pt-2 border-t">
-                    <span className="font-semibold">Total:</span>
+                    <span className="text-gray-600">Total:</span>
                     <span className="font-bold text-yellow-600 text-lg">
                       {prixTotal.toLocaleString()} FCFA
                     </span>
@@ -316,7 +313,6 @@ export default function ReservationPage({ params }) {
               </div>
             )}
 
-            {/* Boutons */}
             <div className="flex gap-3">
               <Link
                 href={`/appartements/${id}`}
@@ -326,7 +322,7 @@ export default function ReservationPage({ params }) {
               </Link>
               <button
                 type="submit"
-                disabled={submitting || !!dateError || !dateDebut || !dateFin || !utilisateurEmail || !utilisateurNom}
+                disabled={submitting || !!dateError || !dateDebut || !dateFin}
                 className="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-3 rounded-lg font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {submitting ? 'Envoi...' : 'Confirmer la réservation'}

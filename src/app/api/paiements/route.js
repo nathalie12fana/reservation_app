@@ -1,108 +1,167 @@
-import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/mongodb";
-import Paiement from "@/models/Paiement";
-import Reservation from "@/models/Reservation";
+import connectDB from '@/lib/mongodb'
+import Paiement from '@/models/Paiement'
+import Reservation from '@/models/Reservation'
+import { NextResponse } from 'next/server'
 
-/* ======================
-   POST : Create a new payment
-====================== */
-export async function POST(request) {
+export async function GET(request) {
   try {
     await connectDB();
-    const data = await request.json();
-
-    console.log('Données de paiement reçues:', data);
-
-    // Validate required fields
-    if (!data.reservation || !data.modePaiement) {
+    
+    const { searchParams } = new URL(request.url);
+    const reservationId = searchParams.get('reservationId');
+    
+    let filter = {};
+    if (reservationId) filter.reservation = reservationId;
+    
+    const paiement = await Paiement.findOne(filter)
+      .populate('reservation')
+      .populate('utilisateur', 'nom email telephone');
+    
+    if (!paiement) {
       return NextResponse.json(
-        { message: "La réservation et le mode de paiement sont requis" },
-        { status: 400 }
-      );
-    }
-
-    // Check if reservation exists
-    const reservation = await Reservation.findById(data.reservation);
-    if (!reservation) {
-      return NextResponse.json(
-        { message: "Réservation non trouvée" },
+        { message: 'Paiement non trouvé' },
         { status: 404 }
       );
     }
-
-    // Get the price from reservation
-    const montant = reservation.prixTotal || 0;
-
-    // Determine payment status based on payment method
-    let statut = 'en_attente';
-    if (data.modePaiement === 'orange_money' || data.modePaiement === 'mobile_money') {
-      statut = 'payé'; // For mobile payments, we assume immediate payment
-    } else if (data.modePaiement === 'cash') {
-      statut = 'en_attente'; // Cash payment will be made later
-    }
-
-    // Create payment
-    const paiement = await Paiement.create({
-      reservation: data.reservation,
-      montant: montant,
-      modePaiement: data.modePaiement,
-      statut: statut,
-      datePaiement: new Date()
-    });
-
-    // Update reservation with payment reference and status
-    await Reservation.findByIdAndUpdate(data.reservation, {
-      paiement: paiement._id,
-      statut: statut === 'payé' ? 'confirmée' : 'en_attente'
-    });
-
-    return NextResponse.json(
-      { 
-        message: "Paiement enregistré avec succès", 
-        paiement: paiement 
-      },
-      { status: 201 }
-    );
+    
+    return NextResponse.json(paiement);
   } catch (error) {
-    console.error("Error creating payment:", error);
+    console.error('Erreur GET paiement:', error);
     return NextResponse.json(
-      { message: "Erreur lors du paiement", error: error.message },
+      { message: 'Erreur lors de la récupération', error: error.message },
       { status: 500 }
     );
   }
 }
 
-/* ======================
-   GET : Get payment by reservation ID
-====================== */
-export async function GET(request) {
+export async function POST(request) {
   try {
+    console.log('🔵 Début de la création du paiement');
     await connectDB();
-    const { searchParams } = new URL(request.url);
-    const reservationId = searchParams.get("reservationId");
-
+    
+    const body = await request.json();
+    console.log('📦 Body reçu:', body);
+    
+    // Accepter les deux formats: reservation ou reservationId
+    const reservationId = body.reservation || body.reservationId;
+    const { modePaiement, montant, utilisateurId } = body;
+    
     if (!reservationId) {
+      console.error('❌ Aucun ID de réservation fourni');
       return NextResponse.json(
-        { message: "ID de réservation requis" },
+        { success: false, message: 'L\'ID de réservation est requis' },
         { status: 400 }
       );
     }
 
-    const paiement = await Paiement.findOne({ reservation: reservationId })
-      .populate("reservation");
-
-    if (!paiement) {
+    if (!modePaiement) {
+      console.error('❌ Aucun mode de paiement fourni');
       return NextResponse.json(
-        { message: "Paiement non trouvé" },
+        { success: false, message: 'Le mode de paiement est requis' },
+        { status: 400 }
+      );
+    }
+
+    // Récupérer la réservation pour obtenir le montant et l'utilisateur
+    const reservation = await Reservation.findById(reservationId)
+      .populate('appartement')
+      .populate('utilisateur');
+
+    if (!reservation) {
+      console.error('❌ Réservation non trouvée:', reservationId);
+      return NextResponse.json(
+        { success: false, message: 'Réservation non trouvée' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(paiement, { status: 200 });
+    console.log('✅ Réservation trouvée:', {
+      id: reservation._id,
+      montant: reservation.prixTotal,
+      utilisateur: reservation.utilisateur?._id
+    });
+
+    // Utiliser le montant de la réservation si non fourni
+    const montantFinal = montant || reservation.prixTotal;
+    const utilisateurFinal = utilisateurId || reservation.utilisateur?._id;
+
+    // Vérifier si un paiement existe déjà pour cette réservation
+    const paiementExistant = await Paiement.findOne({ reservation: reservationId });
+    if (paiementExistant) {
+      console.log('⚠️ Paiement déjà existant pour cette réservation');
+      return NextResponse.json(
+        { 
+          success: false, 
+          message: 'Un paiement existe déjà pour cette réservation',
+          paiement: paiementExistant
+        },
+        { status: 400 }
+      );
+    }
+
+    // Créer le paiement
+    console.log('💳 Création du paiement avec:', {
+      reservation: reservationId,
+      utilisateur: utilisateurFinal,
+      modePaiement,
+      montant: montantFinal
+    });
+
+    const paiementData = {
+      reservation: reservationId,
+      modePaiement,
+      montant: montantFinal,
+      statut: modePaiement === 'cash' ? 'en_attente' : 'payé',
+      datePaiement: new Date()
+    };
+
+    // Ajouter l'utilisateur seulement s'il existe
+    if (utilisateurFinal) {
+      paiementData.utilisateur = utilisateurFinal;
+    }
+
+    const paiement = await Paiement.create(paiementData);
+    
+    console.log('✅ Paiement créé:', paiement._id);
+
+    // Mettre à jour le statut de la réservation
+    const newStatus = modePaiement === 'cash' ? 'confirmée' : 'payée';
+    await Reservation.findByIdAndUpdate(
+      reservationId,
+      { statut: newStatus }
+    );
+    
+    console.log('✅ Statut de la réservation mis à jour:', newStatus);
+
+    const populatedPaiement = await Paiement.findById(paiement._id)
+      .populate('reservation')
+      .populate('utilisateur', 'nom email telephone');
+    
+    console.log('✅ Paiement finalisé et populé');
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Paiement créé avec succès',
+      paiement: populatedPaiement 
+    }, { status: 201 });
   } catch (error) {
-    console.error("Error fetching payment:", error);
+    console.error('💥 Erreur POST paiement complète:', error);
+    console.error('Stack:', error.stack);
+    
+    // Envoyer un message d'erreur plus détaillé
+    let errorMessage = 'Erreur lors de la création du paiement';
+    if (error.name === 'ValidationError') {
+      errorMessage = 'Données de paiement invalides';
+    } else if (error.name === 'CastError') {
+      errorMessage = 'ID de réservation invalide';
+    }
+    
     return NextResponse.json(
-      { message: "Erreur serveur", error: error.message },
+      { 
+        success: false, 
+        message: errorMessage, 
+        error: error.message,
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      },
       { status: 500 }
     );
   }

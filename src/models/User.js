@@ -1,28 +1,28 @@
 import mongoose, { Schema } from "mongoose";
 
 const UserSchema = new Schema({
-  fullName: {
+  nom: {
     type: String,
     required: true,
-  },
-  userName: {
-    type: String,
-    required: true,
-    unique: true,
   },
   email: {
     type: String,
     required: true,
     unique: true,
   },
-  passwordHash: {
+  telephone: {
+    type: String,
+    required: false,
+  },
+  motDePasse: {
     type: String,
     required: true,
   },
   role: { 
     type: String, 
-    enum: ["locataire", "proprietaire", "admin"], 
-    default: "locataire" },
+    enum: ["client", "proprietaire", "admin"], 
+    default: "client" 
+  },
 }, {
   timestamps: true,
 });

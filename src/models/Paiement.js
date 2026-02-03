@@ -7,6 +7,11 @@ const paiementSchema = new mongoose.Schema({
     ref: 'Reservation',
     required: true
   },
+  utilisateur: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: false
+  },
   montant: {
     type: Number,
     required: true
@@ -24,6 +29,10 @@ const paiementSchema = new mongoose.Schema({
   datePaiement: {
     type: Date,
     default: Date.now
+  },
+  numeroTransaction: {
+    type: String,
+    required: false
   }
 }, {
   timestamps: true

@@ -2,8 +2,10 @@
 
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import { Suspense } from 'react'
 
-export default function SuccessPage() {
+// Component that uses useSearchParams
+function SuccessContent() {
   const searchParams = useSearchParams()
   const reservationId = searchParams.get('reservationId')
   const mode = searchParams.get('mode')
@@ -20,9 +22,9 @@ export default function SuccessPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center px-4 py-12">
       <div className="max-w-2xl w-full">
-        {/* Carte de succès */}
+        {/* Success card */}
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
-          {/* En-tête vert avec icône de succès */}
+          {/* Green header with success icon */}
           <div className="bg-gradient-to-r from-green-500 to-green-600 p-8 text-center">
             <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full mb-4 animate-bounce">
               <span className="text-5xl">✓</span>
@@ -35,9 +37,9 @@ export default function SuccessPage() {
             </p>
           </div>
 
-          {/* Contenu */}
+          {/* Content */}
           <div className="p-8">
-            {/* Informations */}
+            {/* Information */}
             <div className="space-y-4 mb-8">
               <div className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg">
                 <span className="text-2xl">📧</span>
@@ -89,7 +91,7 @@ export default function SuccessPage() {
               )}
             </div>
 
-            {/* Prochaines étapes */}
+            {/* Next steps */}
             <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-6 mb-8">
               <h2 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
                 <span>📋</span>
@@ -117,7 +119,7 @@ export default function SuccessPage() {
               </ul>
             </div>
 
-            {/* Boutons d'action */}
+            {/* Action buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
               <Link
                 href="/"
@@ -136,7 +138,7 @@ export default function SuccessPage() {
           </div>
         </div>
 
-        {/* Message d'encouragement */}
+        {/* Encouragement message */}
         <div className="text-center mt-8">
           <p className="text-gray-600 text-sm">
             🎉 Merci d'avoir choisi notre plateforme !
@@ -144,5 +146,26 @@ export default function SuccessPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+// Loading fallback component
+function SuccessLoading() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Chargement...</p>
+      </div>
+    </div>
+  )
+}
+
+// Main component - wraps SuccessContent in Suspense
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={<SuccessLoading />}>
+      <SuccessContent />
+    </Suspense>
   )
 }

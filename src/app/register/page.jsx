@@ -7,9 +7,9 @@ import { useRouter } from 'next/navigation'
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
-    fullName: '',
-    userName: '',
+    nom: '',
     email: '',
+    telephone: '',
     password: '',
     confirmPassword: '',
   })
@@ -43,11 +43,10 @@ export default function RegisterPage() {
     setLoading(true)
 
     const result = await register({
-      fullName: formData.fullName,
-      userName: formData.userName,
+      nom: formData.nom,
       email: formData.email,
+      telephone: formData.telephone,
       password: formData.password,
-      role: 'locataire', // Default role
     })
 
     if (result.success) {
@@ -78,36 +77,19 @@ export default function RegisterPage() {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Full Name */}
+            {/* Nom */}
             <div>
-              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="nom" className="block text-sm font-medium text-gray-700 mb-2">
                 Nom complet
               </label>
               <input
-                id="fullName"
-                name="fullName"
+                id="nom"
+                name="nom"
                 type="text"
-                value={formData.fullName}
+                value={formData.nom}
                 onChange={handleChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                 placeholder="Jean Dupont"
-                required
-              />
-            </div>
-
-            {/* Username */}
-            <div>
-              <label htmlFor="userName" className="block text-sm font-medium text-gray-700 mb-2">
-                Nom d'utilisateur
-              </label>
-              <input
-                id="userName"
-                name="userName"
-                type="text"
-                value={formData.userName}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                placeholder="jeandupont"
                 required
               />
             </div>
@@ -125,6 +107,23 @@ export default function RegisterPage() {
                 onChange={handleChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                 placeholder="jean@example.com"
+                required
+              />
+            </div>
+
+            {/* Téléphone */}
+            <div>
+              <label htmlFor="telephone" className="block text-sm font-medium text-gray-700 mb-2">
+                Téléphone
+              </label>
+              <input
+                id="telephone"
+                name="telephone"
+                type="tel"
+                value={formData.telephone}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                placeholder="+237 6XX XXX XXX"
                 required
               />
             </div>

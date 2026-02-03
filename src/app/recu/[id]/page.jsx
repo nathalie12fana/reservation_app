@@ -3,7 +3,7 @@
 import { useState, useEffect, use, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
+
 
 export default function RecuPage({ params }) {
   const { id } = use(params)
@@ -82,7 +82,7 @@ export default function RecuPage({ params }) {
             href="/" 
             className="inline-block bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg font-semibold transition"
           >
-            Retour à laccueil
+            Retour à l accueil
           </Link>
         </div>
       </div>
@@ -124,7 +124,7 @@ export default function RecuPage({ params }) {
             <div className="flex justify-between items-start">
               <div>
                 <h1 className="text-4xl font-bold text-gray-800 mb-2">APPART</h1>
-                <p className="text-gray-600">Location dappartements</p>
+                <p className="text-gray-600">Location d appartements</p>
               </div>
               <div className="text-right">
                 <div className="bg-green-100 text-green-800 px-4 py-2 rounded-lg inline-block">
@@ -350,11 +350,11 @@ export default function RecuPage({ params }) {
             <ul className="space-y-2 text-sm text-gray-700">
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 mt-1">•</span>
-                <span>Larrivée s effectue à partir de 14h00 et le départ avant 11h00</span>
+                <span>L arrivée s effectue à partir de 14h00 et le départ avant 11h00</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 mt-1">•</span>
-                <span>Une pièce d identité valide sera demandée lors de larrivée</span>
+                <span>Une pièce d identité valide sera demandée lors de l arrivée</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-blue-600 mt-1">•</span>
@@ -424,7 +424,7 @@ export default function RecuPage({ params }) {
               className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-2 rounded-lg font-medium transition flex items-center gap-2"
             >
               <span>🏠</span>
-              Retour à laccueil
+              Retour à l accueil
             </button>
           </div>
         </div>

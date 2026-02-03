@@ -1,111 +1,83 @@
-import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/mongodb"; // ✅ named import
-import Appartement from "@/models/Appartement";
-import User from "@/models/User";
+import connectDB from '@/lib/mongodb'
+import Appartement from '@/models/Appartement'
+import { NextResponse } from 'next/server'
 
-/* ======================
-   GET : Get single appartement by ID
-====================== */
 export async function GET(request, { params }) {
+  const { id } = await params;
+
   try {
     await connectDB();
-
-    // ❌ Remove await
-    // const { id } = await params;
-    // ✅ Correct:
-    const { id } = params;
-
-    const appartement = await Appartement.findById(id).populate(
-      "proprietaire",
-      "fullName email userName"
-    );
-
+    
+    const appartement = await Appartement.findById(id);
+    
     if (!appartement) {
       return NextResponse.json(
-        { message: "Appartement non trouvé" },
+        { message: 'Appartement non trouvé' },
         { status: 404 }
       );
     }
-
-    return NextResponse.json(appartement, { status: 200 });
+    
+    return NextResponse.json(appartement);
   } catch (error) {
-    console.error("Error fetching appartement:", error);
+    console.error('Erreur GET appartement:', error);
     return NextResponse.json(
-      { message: "Erreur serveur", error: error.message },
+      { message: 'Erreur lors de la récupération', error: error.message },
       { status: 500 }
     );
   }
 }
 
-/* ======================
-   PUT : Update a specific appartement
-====================== */
 export async function PUT(request, { params }) {
+  const { id } = await params;
+
   try {
     await connectDB();
-
-    // ❌ Remove await
-    // const { id } = await params;
-    // ✅ Correct:
-    const { id } = params;
-
-    const data = await request.json();
-
-    const appartement = await Appartement.findByIdAndUpdate(id, data, {
-      new: true,
-      runValidators: true,
-    });
-
+    const body = await request.json();
+    
+    const appartement = await Appartement.findByIdAndUpdate(
+      id,
+      body,
+      { new: true, runValidators: true }
+    );
+    
     if (!appartement) {
       return NextResponse.json(
-        { message: "Appartement non trouvé" },
+        { message: 'Appartement non trouvé' },
         { status: 404 }
       );
     }
-
-    return NextResponse.json(
-      { message: "Appartement mis à jour", appartement },
-      { status: 200 }
-    );
+    
+    return NextResponse.json(appartement);
   } catch (error) {
-    console.error("Error updating appartement:", error);
+    console.error('Erreur PUT appartement:', error);
     return NextResponse.json(
-      { message: "Erreur lors de la mise à jour", error: error.message },
-      { status: 400 }
+      { message: 'Erreur lors de la mise à jour', error: error.message },
+      { status: 500 }
     );
   }
 }
 
-/* ======================
-   DELETE : Delete a specific appartement
-====================== */
 export async function DELETE(request, { params }) {
+  const { id } = await params;
+
   try {
     await connectDB();
-
-    // ❌ Remove await
-    // const { id } = await params;
-    // ✅ Correct:
-    const { id } = params;
-
+    
     const appartement = await Appartement.findByIdAndDelete(id);
-
+    
     if (!appartement) {
       return NextResponse.json(
-        { message: "Appartement non trouvé" },
+        { message: 'Appartement non trouvé' },
         { status: 404 }
       );
     }
-
-    return NextResponse.json(
-      { message: "Appartement supprimé avec succès" },
-      { status: 200 }
-    );
+    
+    return NextResponse.json({ message: 'Appartement supprimé avec succès' });
   } catch (error) {
-    console.error("Error deleting appartement:", error);
+    console.error('Erreur DELETE appartement:', error);
     return NextResponse.json(
-      { message: "Erreur lors de la suppression", error: error.message },
-      { status: 400 }
+      { message: 'Erreur lors de la suppression', error: error.message },
+      { status: 500 }
     );
   }
 }

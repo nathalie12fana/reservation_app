@@ -64,15 +64,17 @@ export default function PaiementPage({ params }) {
 
       if (!response.ok) {
         console.error('❌ Erreur API:', result)
-        throw new Error(result.message || 'Erreur de paiement')
+        // Afficher un message d'erreur plus clair
+        const errorMessage = result.message || 'Erreur lors de la création du paiement'
+        throw new Error(errorMessage)
       }
 
-      console.log('✅ Paiement réussi, redirection vers la page de succès')
-      // Redirection vers la page de succès avec les infos
-      router.push(`/success?reservationId=${id}&mode=${modePaiement}`)
+      console.log('✅ Paiement réussi, redirection vers le reçu')
+      // Redirection vers la page de reçu
+      router.push(`/recu/${id}`)
     } catch (err) {
       console.error('💥 Erreur paiement complète:', err)
-      setError(err.message)
+      setError(err.message || 'Une erreur est survenue lors du paiement')
     } finally {
       setSubmitting(false)
     }
