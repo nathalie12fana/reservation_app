@@ -98,7 +98,7 @@ export default function RegisterPage() {
             {/* Username */}
             <div>
               <label htmlFor="userName" className="block text-sm font-medium text-gray-700 mb-2">
-                Nom d'utilisateur
+                Nom d utilisateur
               </label>
               <input
                 id="userName"
@@ -183,7 +183,7 @@ export default function RegisterPage() {
               </Link>
             </p>
             <Link href="/" className="block text-sm text-gray-500 hover:text-gray-700">
-              ← Retour à l'accueil
+              ← Retour à l accueil
             </Link>
           </div>
         </div>
