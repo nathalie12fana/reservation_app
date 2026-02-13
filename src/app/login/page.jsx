@@ -99,6 +99,11 @@ export default function LoginPage() {
             <Link href="/" className="block text-sm text-gray-500 hover:text-gray-700">
               ← Retour à l'accueil
             </Link>
+            <div className="pt-4 mt-4 border-t border-gray-200">
+              <Link href="/admin-login" className="text-sm text-red-600 hover:text-red-700 font-semibold">
+                🔐 Accès Administrateur →
+              </Link>
+            </div>
           </div>
         </div>
 

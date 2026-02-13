@@ -127,6 +127,12 @@ export default function Navbar() {
                     <DropdownMenuItem asChild>
                       <Link href="/register">📝 Inscription</Link>
                     </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin-login" className="text-red-600 font-semibold">
+                        🔐 Connexion Admin
+                      </Link>
+                    </DropdownMenuItem>
                   </>
                 )}
               </DropdownMenuContent>
@@ -246,6 +252,14 @@ export default function Navbar() {
                     className="block px-3 py-2 rounded-md text-gray-700 hover:bg-gray-100"
                   >
                     📝 Inscription
+                  </Link>
+                  <div className="my-2 border-t"></div>
+                  <Link
+                    href="/admin-login"
+                    onClick={() => setIsOpen(false)}
+                    className="block px-3 py-2 rounded-md text-red-600 font-semibold hover:bg-red-50"
+                  >
+                    🔐 Connexion Admin
                   </Link>
                 </>
               )}
